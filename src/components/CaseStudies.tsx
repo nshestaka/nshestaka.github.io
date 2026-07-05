@@ -177,7 +177,7 @@ function CaseStudyScene({ cs, index }: { cs: CaseStudy; index: number }) {
             {/* Card link — clips its contents to the stage rect */}
             <a
               ref={cardRef}
-              href={`/case-studies/${cs.slug}`}
+              href={`#/case-studies/${cs.slug}`}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
               onMouseMove={onMouseMove}
