@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 4.95175 4.96655" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Top-Reflection" d="M4.95175 2.48328C4.95175 3.84991 3.83844 4.96655 2.47588 4.96655C1.11331 4.96655 0 3.84991 0 2.48328C0 1.11664 1.09669 0 2.47588 0C3.85506 0 4.95175 1.09997 4.95175 2.48328Z" fill="url(#paint0_radial_9318_72349)" style="mix-blend-mode:multiply"/>
+<defs>
+<radialGradient id="paint0_radial_9318_72349" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(2.47588 2.48328) scale(2.47588 2.48328)">
+<stop stop-color="#231F20"/>
+<stop offset="0.2" stop-color="#165068"/>
+<stop offset="0.38" stop-color="#0C78A1"/>
+<stop offset="0.54" stop-color="#0594CB"/>
+<stop offset="0.66" stop-color="#01A6E4"/>
+<stop offset="0.73" stop-color="#00ADEE"/>
+<stop offset="0.76" stop-color="#01A5E3"/>
+<stop offset="0.81" stop-color="#0693C8"/>
+<stop offset="0.87" stop-color="#0D749B"/>
+<stop offset="0.94" stop-color="#184A5E"/>
+<stop offset="1" stop-color="#231F20"/>
+</radialGradient>
+</defs>
+</svg>

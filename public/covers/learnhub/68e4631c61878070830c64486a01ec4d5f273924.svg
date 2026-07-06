@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="BG">
+<circle id="Ellipse 43" opacity="0.4" cx="120" cy="120" r="119" stroke="var(--stroke-0, #ADE1FF)" stroke-width="2"/>
+<g id="Ellipse 44">
+<circle cx="120" cy="120" r="114" fill="var(--fill-0, white)" fill-opacity="0.04"/>
+<circle cx="120" cy="120" r="113" stroke="var(--stroke-0, white)" stroke-opacity="0.1" stroke-width="2"/>
+</g>
+</g>
+</svg>
