@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { motion, useScroll, useSpring, type Variants } from 'motion/react'
 import { caseStudies, type CaseStudy } from '../data/caseStudies'
 import { caseStudyContent, type Block } from '../data/caseStudyContent'
-import { onInternalLinkClick } from '../hooks/useLocation'
 import { EASE_OUT_QUART } from '../lib/motion'
 
 const fadeUp: Variants = {
@@ -143,8 +142,7 @@ function CaseStudyPage({ cs }: { cs: CaseStudy }) {
               Next case study
             </span>
             <a
-              href={`/case-studies/${next.slug}`}
-              onClick={(e) => onInternalLinkClick(e, `/case-studies/${next.slug}`)}
+              href={`#/case-studies/${next.slug}`}
               className="group mt-4 flex flex-wrap items-baseline justify-between gap-4"
             >
               <span className="font-serif text-4xl transition-colors group-hover:text-accent md:text-6xl">
@@ -159,8 +157,7 @@ function CaseStudyPage({ cs }: { cs: CaseStudy }) {
 
           <div className="mt-10 flex justify-center">
             <a
-              href="/"
-              onClick={(e) => onInternalLinkClick(e, '/')}
+              href="#work"
               className="rounded-full border border-line bg-white/50 px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-paper-soft"
             >
               ← Back to all work
