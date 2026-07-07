@@ -7,10 +7,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Marcellus&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Genos:wght@400;500&family=Manrope:wght@200;300;400;500;600;700;800&family=Marcellus&family=Urbanist:wght@400;600&display=swap"
       rel="stylesheet"
     />
     <title>Studio — UX/UI Designer</title>
+    <script>
+      // Restore the path stashed by 404.html (GitHub Pages SPA fallback) before
+      // React mounts, so deep links like /case-studies/desiam resolve.
+      (function () {
+        var q = window.location.search
+        if (q.indexOf('?/') === 0) {
+          var route = q.slice(2).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&')
+          })
+          window.history.replaceState(
+            null,
+            '',
+            '/' + route[0] + (route[1] ? '?' + route[1] : '') + window.location.hash,
+          )
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

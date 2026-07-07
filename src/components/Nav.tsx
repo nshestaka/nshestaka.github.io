@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useScrollDirection } from '../hooks/useScrollDirection'
+import { navigate, onInternalLinkClick } from '../hooks/useLocation'
 import { EASE_OUT_QUART } from '../lib/motion'
 
 const links = [
@@ -18,10 +19,14 @@ function Nav() {
     if (!href.startsWith('#')) return
     e.preventDefault()
     const el = document.querySelector(href)
-    if (!el) return
-    const top = el.getBoundingClientRect().top + window.scrollY - 72
-    window.scrollTo({ top, behavior: 'smooth' })
-    history.replaceState(null, '', href)
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 72
+      window.scrollTo({ top, behavior: 'smooth' })
+      history.replaceState(null, '', href)
+    } else {
+      // Section lives on the home page — route there, then it scrolls itself.
+      navigate('/' + href)
+    }
   }, [])
 
   return (
@@ -37,6 +42,7 @@ function Nav() {
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-1.5 md:px-12">
             <a
               href="/"
+              onClick={(e) => onInternalLinkClick(e, '/')}
               aria-label="Natalia Shestaka — home"
               className="font-display flex flex-col text-[24px] leading-[20px] text-[#25252D]"
             >

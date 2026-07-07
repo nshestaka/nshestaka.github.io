@@ -9,6 +9,7 @@ import {
   type MotionValue,
 } from 'motion/react'
 import { caseStudies, type CaseStudy } from '../data/caseStudies'
+import { onInternalLinkClick } from '../hooks/useLocation'
 
 /**
  * Case studies — scrollytelling with two reveal modes.
@@ -178,6 +179,7 @@ function CaseStudyScene({ cs, index }: { cs: CaseStudy; index: number }) {
             <a
               ref={cardRef}
               href={`/case-studies/${cs.slug}`}
+              onClick={(e) => onInternalLinkClick(e, `/case-studies/${cs.slug}`)}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
               onMouseMove={onMouseMove}
