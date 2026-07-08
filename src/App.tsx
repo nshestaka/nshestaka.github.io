@@ -9,6 +9,9 @@ import Contact from './components/Contact'
 import ScrollToTop from './components/ScrollToTop'
 import CommentVisibility from './components/CommentVisibility'
 import LearnHub from './components/LearnHub'
+import DesiamCaseStudy from './components/desiam/DesiamCaseStudy'
+import CaseStudyPage from './components/CaseStudyPage'
+import { caseStudies } from './data/caseStudies'
 
 function useHashRoute() {
   const [hash, setHash] = useState(() => window.location.hash)
@@ -19,6 +22,8 @@ function useHashRoute() {
   }, [])
   return hash
 }
+
+const CASE_STUDY_PREFIX = '/case-studies/'
 
 function App() {
   const hash = useHashRoute()
@@ -35,6 +40,12 @@ function App() {
     page = <CommentVisibility />
   } else if (route === '/case-studies/learnhub') {
     page = <LearnHub />
+  } else if (route === '/case-studies/desiam') {
+    page = <DesiamCaseStudy />
+  } else if (route.startsWith(CASE_STUDY_PREFIX)) {
+    const slug = route.slice(CASE_STUDY_PREFIX.length).replace(/\/$/, '')
+    const cs = caseStudies.find((c) => c.slug === slug)
+    if (cs) page = <CaseStudyPage cs={cs} />
   }
 
   return (

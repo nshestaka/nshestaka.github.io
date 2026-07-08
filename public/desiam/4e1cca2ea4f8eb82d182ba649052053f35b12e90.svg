@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 6.64771 6.65125" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Camera">
+<g id="Ellipse 57">
+<ellipse cx="3.32385" cy="3.32563" rx="3.32385" ry="3.32563" fill="var(--fill-0, black)"/>
+<ellipse cx="3.32385" cy="3.32563" rx="3.32385" ry="3.32563" fill="var(--fill-1, black)"/>
+<ellipse cx="3.32385" cy="3.32563" rx="3.32385" ry="3.32563" fill="var(--fill-2, black)"/>
+<ellipse cx="3.32385" cy="3.32563" rx="3.32385" ry="3.32563" fill="var(--fill-3, black)"/>
+</g>
+<ellipse id="Ellipse 58" opacity="0.15" cx="3.32397" cy="3.32514" rx="1.99431" ry="1.99538" fill="var(--fill-0, white)"/>
+</g>
+</svg>
