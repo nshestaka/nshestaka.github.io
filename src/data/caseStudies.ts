@@ -14,13 +14,37 @@ export type CaseStudy = {
    * circular saturated window at the cursor.
    */
   sketchCover?: string
+  /** Optional short disclosure shown under the card caption (e.g. an NDA note). */
+  note?: string
   slug: string
 }
 
 export const caseStudies: CaseStudy[] = [
   {
-    id: 'learnhub',
+    id: 'proactive-intelligence',
     number: '01',
+    title: 'Proactive Intelligence',
+    kicker: 'AI product · Enterprise',
+    year: '2025',
+    role: 'Lead Product Designer',
+    description:
+      'Most intelligence tools wait to be asked. This one does the opposite: an AI intelligence analyst that reaches out first, with the right update, before the user asks.',
+    tags: [
+      'Product Strategy',
+      'Proactive UX',
+      'Chat-driven Onboarding',
+      'Knowledge Graph',
+      'Trust & Verification',
+      'Design System',
+      'Motion Design',
+    ],
+    cover: '/covers/proactive-intelligence.svg',
+    note: 'Generalized under NDA. No client, product, or personal names are used.',
+    slug: 'proactive-intelligence',
+  },
+  {
+    id: 'learnhub',
+    number: '02',
     title: 'LearnHub',
     kicker: 'Mobile · Education',
     year: '2024',
@@ -45,7 +69,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'desiam',
-    number: '02',
+    number: '03',
     title: 'DESIAM',
     kicker: 'Web · Community platform',
     year: '2023',
@@ -68,7 +92,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'winery',
-    number: '03',
+    number: '04',
     title: 'Stine Winery',
     kicker: 'Web · E-commerce',
     year: '2023',

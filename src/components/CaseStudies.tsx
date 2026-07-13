@@ -282,6 +282,14 @@ function CaseStudyScene({ cs, index }: { cs: CaseStudy; index: number }) {
             <p className="font-serif text-2xl italic leading-snug text-neutral-100 md:text-3xl">
               {cs.description}
             </p>
+            {cs.note && (
+              <p className="mt-4 inline-flex items-center gap-2 text-[12px] font-light text-neutral-400">
+                <span className="rounded border border-neutral-600 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-300">
+                  NDA
+                </span>
+                {cs.note}
+              </p>
+            )}
           </motion.div>
         </motion.div>
       </div>

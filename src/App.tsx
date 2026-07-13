@@ -11,6 +11,7 @@ import CommentVisibility from './components/CommentVisibility'
 import LearnHub from './components/LearnHub'
 import DesiamCaseStudy from './components/desiam/DesiamCaseStudy'
 import CaseStudyPage from './components/CaseStudyPage'
+import ProactiveIntelligence from './components/case-study/ProactiveIntelligence'
 import { caseStudies } from './data/caseStudies'
 
 function useHashRoute() {
@@ -24,16 +25,13 @@ function useHashRoute() {
 }
 
 const CASE_STUDY_PREFIX = '/case-studies/'
+// Home-page section ids (matches the Nav links). Arriving with one of these as
+// the hash (e.g. `/#workflow` from a sub-page) should scroll to that section.
+const SECTION_IDS = new Set(['work', 'workflow', 'ux-audit', 'cv', 'contact'])
 
 function App() {
   const hash = useHashRoute()
-
   const route = hash.replace(/^#/, '')
-
-  // Land at the top whenever the route changes (e.g. opening a case study).
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [route])
 
   let page = null
   if (route === '/two-audience-commenting') {
@@ -42,15 +40,44 @@ function App() {
     page = <LearnHub />
   } else if (route === '/case-studies/desiam') {
     page = <DesiamCaseStudy />
+  } else if (route === '/case-studies/proactive-intelligence') {
+    page = <ProactiveIntelligence />
   } else if (route.startsWith(CASE_STUDY_PREFIX)) {
     const slug = route.slice(CASE_STUDY_PREFIX.length).replace(/\/$/, '')
     const cs = caseStudies.find((c) => c.slug === slug)
     if (cs) page = <CaseStudyPage cs={cs} />
   }
 
+  // Scroll behaviour on route change: a sub-page lands at the top; a home
+  // section hash (e.g. arriving from a case study via `/#workflow`) scrolls to
+  // that section, re-pinning for a beat as images/layout settle.
+  useEffect(() => {
+    if (!SECTION_IDS.has(route)) {
+      window.scrollTo(0, 0)
+      return
+    }
+    let frame = 0
+    let ticks = 0
+    let lastTop = -1
+    const settle = () => {
+      const el = document.getElementById(route)
+      if (el) {
+        const top = Math.round(el.getBoundingClientRect().top + window.scrollY - 72)
+        if (Math.abs(top - lastTop) > 1) {
+          window.scrollTo({ top, behavior: 'auto' })
+          lastTop = top
+        }
+      }
+      ticks += 1
+      if (ticks < 45) frame = requestAnimationFrame(settle) // ~0.75s of settling
+    }
+    frame = requestAnimationFrame(settle)
+    return () => cancelAnimationFrame(frame)
+  }, [route])
+
   return (
     <div className="min-h-screen overflow-x-clip bg-paper text-ink">
-      <Nav />
+      <Nav progress={route === '/case-studies/proactive-intelligence'} />
       {page ?? (
         <main>
           <Hero />
