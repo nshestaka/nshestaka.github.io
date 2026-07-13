@@ -38,3 +38,369 @@ html {
     scroll-behavior: auto;
   }
 }
+
+/* ==========================================================================
+   Case study — "Proactive Intelligence"
+   A self-contained dark theme + a scroll-driven-animation system built on
+   native CSS scroll/view timelines (off the main thread). Everything degrades
+   gracefully: browsers without timeline support, and users who ask for reduced
+   motion, see the final "revealed" state — never a stuck, blank element.
+   ========================================================================== */
+
+.cs-root {
+  --cs-bg: #0a0a0c;
+  --cs-panel: #121217;
+  --cs-panel-2: #171720;
+  --cs-text: #f3f0e8;
+  --cs-text-dim: #cbc7bd;
+  --cs-mute: #8b8578;
+  --cs-line: rgba(255, 255, 255, 0.1);
+  --cs-line-strong: rgba(255, 255, 255, 0.22);
+  --cs-accent: #e6b24c; /* the signal */
+  --cs-accent-soft: #f4d38a;
+  --cs-glow: rgba(230, 178, 76, 0.55);
+
+  background-color: var(--cs-bg);
+  color: var(--cs-text);
+  font-family: var(--font-sans);
+  /* Fine film grain + a warm vignette so the black never reads as flat. */
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(230, 178, 76, 0.08), transparent 55%),
+    radial-gradient(100% 60% at 80% 110%, rgba(230, 178, 76, 0.05), transparent 60%);
+}
+
+.cs-root ::selection {
+  background: var(--cs-accent);
+  color: #0a0a0c;
+}
+
+.cs-serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* --- Scroll progress rail (root scroll timeline) ------------------------- */
+/* Rendered inside the site header so it sits flush on the header's bottom edge
+   and moves/hides together with it — never a floating gap. */
+.cs-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  /* Literal gold — this rail renders inside <Nav>, outside .cs-root, so the
+     --cs-* custom properties aren't in scope here. */
+  background: linear-gradient(90deg, #e6b24c, #f4d38a);
+  box-shadow: 0 0 18px rgba(230, 178, 76, 0.55);
+  z-index: 1;
+  will-change: transform;
+}
+@supports (animation-timeline: scroll()) {
+  .cs-progress {
+    animation: cs-progress-grow linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes cs-progress-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --- Reveal-on-scroll (view timeline) ------------------------------------ */
+.cs-reveal {
+  opacity: 1;
+}
+@keyframes cs-rise {
+  from {
+    opacity: 0;
+    transform: translateY(42px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cs-rise-sm {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cs-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Ranges complete within the `entry` phase (not `cover`), so elements at
+       the very bottom of the page — which can never be scrolled far enough to
+       reach a `cover` endpoint — still finish revealing instead of staying
+       stuck (e.g. the blurred closing line). */
+    .cs-reveal {
+      opacity: 0;
+      animation: cs-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 2% entry 90%;
+    }
+    .cs-reveal-blur {
+      opacity: 0;
+      animation: cs-blur-in linear both;
+      animation-timeline: view();
+      animation-range: entry 2% entry 88%;
+    }
+    /* Stagger children by offsetting each one's range — scroll timelines
+       ignore time-based animation-delay, so we stagger in scroll-space. */
+    .cs-stagger > * {
+      opacity: 0;
+      animation: cs-rise-sm linear both;
+      animation-timeline: view();
+    }
+    .cs-stagger > *:nth-child(1) {
+      animation-range: entry 5% entry 55%;
+    }
+    .cs-stagger > *:nth-child(2) {
+      animation-range: entry 12% entry 62%;
+    }
+    .cs-stagger > *:nth-child(3) {
+      animation-range: entry 19% entry 69%;
+    }
+    .cs-stagger > *:nth-child(4) {
+      animation-range: entry 26% entry 76%;
+    }
+    .cs-stagger > *:nth-child(5) {
+      animation-range: entry 33% entry 83%;
+    }
+    .cs-stagger > *:nth-child(6) {
+      animation-range: entry 40% entry 90%;
+    }
+  }
+}
+
+/* --- Parallax layers (view timeline, transform only = compositor-cheap) -- */
+.cs-parallax {
+  will-change: transform;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .cs-parallax-slow {
+      animation: cs-par-slow linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .cs-parallax-fast {
+      animation: cs-par-fast linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+@keyframes cs-par-slow {
+  from {
+    transform: translateY(8%);
+  }
+  to {
+    transform: translateY(-8%);
+  }
+}
+@keyframes cs-par-fast {
+  from {
+    transform: translateY(22%);
+  }
+  to {
+    transform: translateY(-22%);
+  }
+}
+
+/* --- Signature: knowledge graph seeding sparse -> rich ------------------- */
+/* The tall <section> declares view-timeline-name: --graph; these descendants
+   read it. Nodes/edges each own a slice of the timeline so the graph assembles
+   as the reader scrolls the pinned scene. */
+.g-node,
+.g-edge,
+.g-label {
+  opacity: 1;
+}
+.g-node {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes cs-node-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes cs-edge-draw {
+  from {
+    opacity: 0;
+    stroke-dashoffset: var(--dash, 200);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes cs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .g-node {
+      opacity: 0;
+      animation: cs-node-pop linear both;
+      animation-timeline: --graph;
+    }
+    .g-edge {
+      opacity: 0;
+      stroke-dasharray: var(--dash, 200);
+      animation: cs-edge-draw linear both;
+      animation-timeline: --graph;
+    }
+    .g-label {
+      opacity: 0;
+      animation: cs-fade-up linear both;
+      animation-timeline: --graph;
+    }
+  }
+}
+
+/* --- Signature: the proactive message composing itself ------------------- */
+/* Parts of the notification are revealed across the same --graph timeline, so
+   the card writes itself while the graph fills in behind it. */
+@keyframes cs-msg-part {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cs-stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.msg-part,
+.msg-stamp {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .msg-part {
+      opacity: 0;
+      animation: cs-msg-part linear both;
+      animation-timeline: --graph;
+    }
+    .msg-stamp {
+      opacity: 0;
+      transform-origin: center;
+      animation: cs-stamp-in linear both;
+      animation-timeline: --graph;
+    }
+  }
+}
+
+/* Generic path draw-on-scroll (view timeline) ----------------------------- */
+@keyframes cs-draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .cs-draw {
+      stroke-dasharray: var(--dash, 1200);
+      stroke-dashoffset: var(--dash, 1200);
+      animation: cs-draw-line linear both;
+      animation-timeline: view();
+      animation-range: entry 15% cover 55%;
+    }
+  }
+}
+
+/* Idle signal pulse (time-based, disabled under reduced motion) ----------- */
+@keyframes cs-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+.cs-pulse {
+  animation: cs-pulse 2.6s ease-in-out infinite;
+}
+@keyframes cs-scroll-cue {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+.cs-scroll-cue {
+  animation: cs-scroll-cue 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-pulse,
+  .cs-scroll-cue {
+    animation: none;
+  }
+}
