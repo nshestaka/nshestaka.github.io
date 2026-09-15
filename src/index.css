@@ -349,6 +349,25 @@ html {
   }
 }
 
+/* --- Signature: two-audience dual-lane thread (--thread timeline) -------- */
+/* The tall <section> in the commenting case study declares
+   view-timeline-name: --thread; each comment/composer reads a slice of it via
+   an inline animation-range, so the thread writes itself as the pinned scene
+   scrolls. Reuses the cs-msg-part fade-up keyframes. Degrades to the full
+   thread at rest without timeline support or under reduced motion. */
+.thread-part {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .thread-part {
+      opacity: 0;
+      animation: cs-msg-part linear both;
+      animation-timeline: --thread;
+    }
+  }
+}
+
 /* Generic path draw-on-scroll (view timeline) ----------------------------- */
 @keyframes cs-draw-line {
   to {

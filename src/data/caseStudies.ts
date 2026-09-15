@@ -21,8 +21,30 @@ export type CaseStudy = {
 
 export const caseStudies: CaseStudy[] = [
   {
-    id: 'proactive-intelligence',
+    id: 'two-audience-commenting',
     number: '01',
+    title: 'Two-Audience Commenting',
+    kicker: 'Enterprise portal · Role-based UX',
+    year: '2024',
+    role: 'Senior Product Designer',
+    description:
+      'Experts and the vendors they judged wrote in the same thread, so the experts went quiet. I gave every comment a lane you can read at a glance, and candour came back.',
+    tags: [
+      'Role-based UX',
+      'Two-lane commenting',
+      'Audience-aware compose',
+      'Information Architecture',
+      'Interaction Design',
+      'Design System',
+      'Trust & Confidentiality',
+    ],
+    cover: '/covers/two-audience-commenting.svg',
+    note: 'Generalized under NDA. No client, product, or personal names are used.',
+    slug: 'two-audience-commenting',
+  },
+  {
+    id: 'proactive-intelligence',
+    number: '02',
     title: 'Proactive Intelligence',
     kicker: 'AI product · Enterprise',
     year: '2025',
@@ -44,7 +66,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'learnhub',
-    number: '02',
+    number: '03',
     title: 'LearnHub',
     kicker: 'Mobile · Education',
     year: '2024',
@@ -69,7 +91,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'desiam',
-    number: '03',
+    number: '04',
     title: 'DESIAM',
     kicker: 'Web · Community platform',
     year: '2023',
@@ -92,7 +114,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'winery',
-    number: '04',
+    number: '05',
     title: 'Stine Winery',
     kicker: 'Web · E-commerce',
     year: '2023',

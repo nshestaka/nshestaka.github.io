@@ -61,7 +61,14 @@ function useOnDark() {
   return onDark
 }
 
-function Nav({ progress = false }: { progress?: boolean }) {
+function Nav({
+  progress = false,
+  progressAccent,
+}: {
+  progress?: boolean
+  /** Optional CSS background for the scroll rail (e.g. a gradient); defaults to the site gold. */
+  progressAccent?: string
+}) {
   const onDark = useOnDark()
 
   const smoothScroll = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -138,7 +145,17 @@ function Nav({ progress = false }: { progress?: boolean }) {
         </div>
       </div>
       {/* scroll progress rail — sits flush on the header's bottom edge */}
-      {progress && <div className="cs-progress" aria-hidden />}
+      {progress && (
+        <div
+          className="cs-progress"
+          aria-hidden
+          style={
+            progressAccent
+              ? { background: progressAccent, boxShadow: '0 0 18px rgba(47,199,187,0.5)' }
+              : undefined
+          }
+        />
+      )}
     </motion.nav>
   )
 }

@@ -1,705 +1,982 @@
-import {
-  ArrowUpRight,
-  Building2,
-  Check,
-  Clock3,
-  Eye,
-  EyeOff,
-  Gauge,
-  Lock,
-  MessageSquare,
-  Quote,
-  Send,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
-  UserCircle2,
-  X,
-} from 'lucide-react'
+import { useEffect } from 'react'
+import { motion, type Variants } from 'motion/react'
+import { EASE_OUT_QUART } from '../lib/motion'
 
-/**
- * Case study — "Two-Audience Commenting".
- *
- * A fully self-contained artifact. Design language is intentionally distinct
- * from the rest of the portfolio (Linear / Vercel / Resend): white surface,
- * Inter, tight tracking, electric blue for the *internal* lane and warm amber
- * for the *vendor-facing* lane. No gradients, no heavy shadows.
- *
- * The whole component is scoped to `font-[Inter]` and a near-white base so it
- * can be dropped anywhere without inheriting the host page's typography.
- */
+/* ==========================================================================
+   Case study — "Two-Audience Commenting"
+   A single, immersive long-form page, built to match the Proactive
+   Intelligence study and the rest of the site: dark theme, serif display,
+   scroll-linked motion on native CSS scroll/view timelines (see index.css).
+   motion/react is reserved for the hero entrance and hover micro-interactions.
+   NDA: no company, product, or personal names appear anywhere.
 
-const BLUE = '#2563EB' // electric blue — internal lane
-const AMBER = '#D97706' // warm amber — vendor-facing lane
+   Two functional lane colours run through the product mockups — blue for the
+   reviewer-only lane, Aramco teal for the vendor-facing lane. The site's warm
+   gold accent is overridden to teal on this page (see the root element), so
+   section marks, the progress rail, and closing emphasis all read cool.
+   ========================================================================== */
 
-// ── small primitives ──────────────────────────────────────────────────────
+const INTERNAL = '#6e9bff' // reviewer-only lane
+const VENDOR = '#2fc7bb' // vendor-facing lane — Aramco teal
+const VENDOR_RGB = '47,199,187' // teal, for translucent fills
+const INTERNAL_RGB = '110,155,255' // blue, for translucent fills
+// Blue → teal: the two lanes blended into one, used for signature moments.
+const LANE_GRADIENT = 'linear-gradient(105deg, #6e9bff 0%, #2fc7bb 100%)'
 
-/** Minimal Figma-style callout: a thin line + uppercase label. */
-function Annotation({ children }: { children: React.ReactNode }) {
+const heroFade: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 1, delay: 0.15 + i * 0.16, ease: EASE_OUT_QUART },
+  }),
+}
+
+export default function CommentVisibility() {
+  useEffect(() => {
+    const previous = document.title
+    document.title = 'Two-Audience Commenting — Case study'
+    return () => {
+      document.title = previous
+    }
+  }, [])
+
   return (
-    <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
-      <span className="h-px w-6 bg-neutral-300" />
-      {children}
+    <div
+      className="cs-root min-h-screen overflow-x-clip"
+      // Re-theme this study from the site's warm gold accent to Aramco teal:
+      // every element that reads var(--cs-accent) recolours in one shot, and the
+      // ambient background glow shifts from gold to a blue/teal wash.
+      style={
+        {
+          '--cs-accent': VENDOR,
+          '--cs-accent-soft': '#7fe3da',
+          '--cs-glow': `rgba(${VENDOR_RGB},0.5)`,
+          backgroundImage: `radial-gradient(120% 80% at 50% -10%, rgba(${VENDOR_RGB},0.08), transparent 55%), radial-gradient(100% 60% at 80% 110%, rgba(${INTERNAL_RGB},0.06), transparent 60%)`,
+        } as React.CSSProperties
+      }
+    >
+      <main>
+        <Hero />
+        <MetaStrip />
+        <Problem />
+        <CoreIdea />
+        <DesignWork />
+        <Outcome />
+      </main>
     </div>
   )
 }
 
-function SectionLabel({ index, children }: { index: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-10 flex items-baseline gap-3">
-      <span className="text-[12px] font-semibold tabular-nums text-neutral-300">{index}</span>
-      <h2 className="text-[13px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-        {children}
-      </h2>
-    </div>
-  )
-}
-
-function LaneDot({ tone }: { tone: 'internal' | 'vendor' }) {
-  return (
-    <span
-      className="inline-block h-2 w-2 shrink-0 rounded-full"
-      style={{ backgroundColor: tone === 'internal' ? BLUE : AMBER }}
-    />
-  )
-}
-
-// ── 1. Hero ────────────────────────────────────────────────────────────────
+/* ---- 1. The hook ------------------------------------------------------- */
 
 function Hero() {
   return (
-    <header className="border-b border-neutral-200/80 px-6 pt-20 pb-16 md:px-12 md:pt-28 md:pb-24">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5 text-[12px] font-medium text-neutral-600">
-          <ShieldCheck className="h-3.5 w-3.5" style={{ color: BLUE }} />
-          Senior Product Designer
-          <span className="text-neutral-300">·</span>
-          <span className="text-neutral-400">NDA Project</span>
-        </div>
+    <header className="relative flex min-h-screen items-center overflow-hidden px-6 md:px-12">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 cs-parallax cs-parallax-slow"
+      >
+        <LaneBackdrop />
+      </div>
 
-        <h1 className="max-w-4xl text-balance text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-neutral-900 md:text-5xl md:leading-[1.08]">
-          Designing role-aware comment visibility so reviewers can be candid without leaking
-          internal critique
-        </h1>
-
-        <p className="mt-6 text-[15px] font-medium tracking-tight text-neutral-500">
-          Enterprise portal
-          <span className="mx-2 text-neutral-300">·</span>
-          Evaluation tools
-          <span className="mx-2 text-neutral-300">·</span>
-          Role-based UX
-        </p>
-
-        {/* Two-lane motif, established immediately */}
-        <div className="mt-12 grid max-w-2xl gap-3 sm:grid-cols-2">
-          <div
-            className="flex items-center gap-3 rounded-lg border bg-white px-4 py-3"
-            style={{ borderColor: '#DBE5FF' }}
-          >
-            <Lock className="h-4 w-4" style={{ color: BLUE }} />
-            <div>
-              <div className="text-[13px] font-semibold text-neutral-800">Internal lane</div>
-              <div className="text-[12px] text-neutral-500">Candid, reviewer-only critique</div>
-            </div>
+      <motion.div initial="hidden" animate="show" className="relative mx-auto w-full max-w-6xl">
+        <motion.div variants={heroFade} custom={0} className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <p
+              className="text-[12px] font-semibold uppercase tracking-[0.34em]"
+              style={{ color: 'var(--cs-accent)' }}
+            >
+              Two-Audience Commenting
+            </p>
+            <span
+              className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+              style={{ border: '1px solid var(--cs-accent)', color: 'var(--cs-accent)' }}
+            >
+              NDA
+            </span>
           </div>
-          <div
-            className="flex items-center gap-3 rounded-lg border bg-white px-4 py-3"
-            style={{ borderColor: '#F4E3C4' }}
+          <p className="max-w-lg text-[12px] leading-relaxed" style={{ color: 'var(--cs-mute)' }}>
+            Details changed for NDA. No real client, product, or names here. Picture an enterprise
+            review portal where in-house experts sign off on outside vendors.
+          </p>
+        </motion.div>
+
+        <motion.p
+          variants={heroFade}
+          custom={1}
+          className="cs-serif mt-8 max-w-2xl text-xl italic leading-snug md:text-2xl"
+          style={{ color: 'var(--cs-mute)' }}
+        >
+          The sharpest reviewers went quiet.
+        </motion.p>
+
+        <motion.h1
+          variants={heroFade}
+          custom={2}
+          className="cs-serif mt-4 max-w-5xl text-[clamp(2.4rem,7vw,6rem)] leading-[0.98] tracking-[-0.02em]"
+        >
+          How do you get experts to speak their mind
+          <br />
+          when the vendor they&rsquo;re judging is{' '}
+          <span
+            className="relative whitespace-nowrap bg-clip-text text-transparent"
+            style={{ backgroundImage: LANE_GRADIENT }}
           >
-            <Send className="h-4 w-4" style={{ color: AMBER }} />
-            <div>
-              <div className="text-[13px] font-semibold text-neutral-800">Vendor-facing lane</div>
-              <div className="text-[12px] text-neutral-500">Structured, shareable clarification</div>
-            </div>
-          </div>
-        </div>
+            in the same thread
+            <span
+              className="cs-pulse absolute -right-5 top-2 h-3 w-3 rounded-full md:top-5"
+              style={{ background: VENDOR, boxShadow: `0 0 20px ${VENDOR}` }}
+            />
+          </span>
+          ?
+        </motion.h1>
+
+        <motion.p
+          variants={heroFade}
+          custom={3}
+          className="mt-10 max-w-xl text-[15px] font-light leading-relaxed"
+          style={{ color: 'var(--cs-text-dim)' }}
+        >
+          I led the redesign of commenting for an enterprise review portal, where experts rate
+          outside vendors in one shared thread. Since anyone might be reading, the experts held back
+          and their notes turned to mush. So we stopped hiding the audience and put it front and
+          centre.
+        </motion.p>
+      </motion.div>
+
+      <div
+        className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-2"
+        style={{ color: 'var(--cs-mute)' }}
+      >
+        <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
+        <span className="cs-scroll-cue" aria-hidden>
+          <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+            <path d="M8 2v18M2 14l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
       </div>
     </header>
   )
 }
 
-// ── 2. Personas ──────────────────────────────────────────────────────────
-
-const personas = [
-  {
-    name: 'SME Reviewer',
-    role: 'Subject-matter expert',
-    icon: UserCircle2,
-    tone: 'internal' as const,
-    summary:
-      'A technical expert whose opinions carry the most weight in a decision — and who stays quiet the moment the audience is unclear.',
-    traits: [
-      'Deep domain expertise, sharp judgement',
-      'High-value, high-stakes opinions',
-      'Self-censors when unsure who is reading',
-    ],
-    quote: '“If I can’t tell who sees this, I’ll just say nothing.”',
-  },
-  {
-    name: 'Vendor Representative',
-    role: 'External submitter',
-    icon: Building2,
-    tone: 'vendor' as const,
-    summary:
-      'Submitted weeks ago and has heard little since. Wants a clear, structured channel to answer questions — not silence or a wall of internal jargon.',
-    traits: [
-      'Submitted weeks ago, awaiting signal',
-      'Feels out of the loop on status',
-      'Needs structured, answerable clarification',
-    ],
-    quote: '“I just want to know what they need from me, and by when.”',
-  },
-]
-
-function Personas() {
+/** Two faint, interleaving streams of dots — the two lanes, established behind the hook. */
+function LaneBackdrop() {
+  const dots = Array.from({ length: 30 }, (_, i) => {
+    const internal = i % 2 === 0
+    const along = (i / 30) * 100
+    const drift = ((i * 37) % 22) - 11
+    return {
+      left: `${along}%`,
+      top: `${(internal ? 34 : 66) + drift}%`,
+      s: 2 + (i % 3),
+      internal,
+      strong: i % 7 === 0,
+    }
+  })
   return (
-    <section className="px-6 py-20 md:px-12 md:py-28">
-      <div className="mx-auto max-w-5xl">
-        <SectionLabel index="02">Who we designed for</SectionLabel>
-        <div className="grid gap-5 md:grid-cols-2">
-          {personas.map((p) => {
-            const accent = p.tone === 'internal' ? BLUE : AMBER
-            const Icon = p.icon
-            return (
-              <article
-                key={p.name}
-                className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-7"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-10 w-10 items-center justify-center rounded-full"
-                    style={{ backgroundColor: p.tone === 'internal' ? '#EEF3FF' : '#FBF1DF' }}
-                  >
-                    <Icon className="h-5 w-5" style={{ color: accent }} />
-                  </span>
-                  <div>
-                    <h3 className="text-[16px] font-semibold tracking-tight text-neutral-900">
-                      {p.name}
-                    </h3>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-neutral-400">
-                      {p.role}
-                    </p>
-                  </div>
-                </div>
+    <div className="absolute inset-0">
+      {dots.map((d, i) => (
+        <span
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: d.left,
+            top: d.top,
+            width: d.s,
+            height: d.s,
+            background: d.internal ? INTERNAL : VENDOR,
+            opacity: d.strong ? 0.6 : 0.18,
+            boxShadow: d.strong ? `0 0 12px ${d.internal ? INTERNAL : VENDOR}` : 'none',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
-                <p className="mt-5 text-[14px] leading-relaxed text-neutral-600">{p.summary}</p>
+/* ---- meta strip -------------------------------------------------------- */
 
-                <ul className="mt-5 space-y-2.5">
-                  {p.traits.map((t) => (
-                    <li key={t} className="flex items-start gap-2.5 text-[13px] text-neutral-700">
-                      <LaneDot tone={p.tone} />
-                      <span className="-mt-0.5">{t}</span>
-                    </li>
-                  ))}
-                </ul>
+function MetaStrip() {
+  const items: [string, React.ReactNode][] = [
+    ['Role', 'Senior Product Designer'],
+    [
+      'Scope',
+      <>
+        UX · Role-based access ·<br />
+        <span className="whitespace-nowrap">Interaction design</span>
+      </>,
+    ],
+    ['Surface', 'Enterprise evaluation portal'],
+    ['Users', 'Internal SME reviewers & outside vendors'],
+  ]
+  return (
+    <section className="border-y" style={{ borderColor: 'var(--cs-line)' }}>
+      <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-6 md:grid-cols-4 md:px-12 cs-stagger">
+        {items.map(([k, v]) => (
+          <div key={k} className="py-8">
+            <dt
+              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: 'var(--cs-mute)' }}
+            >
+              {k}
+            </dt>
+            <dd className="mt-2 text-[15px] leading-snug" style={{ color: 'var(--cs-text)' }}>
+              {v}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
+}
 
-                <p
-                  className="mt-6 border-l-2 pl-4 text-[14px] font-medium italic leading-snug text-neutral-700"
-                  style={{ borderColor: accent }}
-                >
-                  {p.quote}
-                </p>
-              </article>
-            )
-          })}
+/* ---- 2. The problem ---------------------------------------------------- */
+
+function Problem() {
+  return (
+    <section className="relative mx-auto grid max-w-7xl gap-16 px-6 py-32 md:grid-cols-2 md:px-12 md:py-48">
+      <div className="md:sticky md:top-0 md:flex md:h-screen md:items-center">
+        <BlendedThread />
+      </div>
+
+      <div className="flex flex-col justify-center gap-24 md:py-[30vh]">
+        <SectionTag n="01" label="The problem" />
+        <div className="cs-reveal max-w-md">
+          <h2 className="cs-serif text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.05]">
+            One thread for two audiences.
+          </h2>
+          <p className="mt-6 text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+            Reviewers and the vendors they judged all wrote in the same thread. Any internal note
+            could, in theory, be read by the company under review. So the people the whole decision
+            leaned on stopped writing anything honest.
+          </p>
         </div>
+        <div className="cs-reveal max-w-md">
+          <p className="text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+            The old fix was a pile of per-comment privacy toggles no one trusted. When you can&rsquo;t
+            tell who&rsquo;s reading, you{' '}
+            <em className="cs-serif not-italic" style={{ color: 'var(--cs-text)' }}>
+              assume the worst
+            </em>{' '}
+            and say something safe and pointless.
+          </p>
+        </div>
+        <blockquote className="cs-reveal-blur max-w-lg">
+          <p className="cs-serif text-[clamp(1.6rem,3.4vw,2.6rem)] italic leading-tight">
+            &ldquo;If I can&rsquo;t tell who sees this, I&rsquo;ll just{' '}
+            <span style={{ color: 'var(--cs-accent)' }}>say nothing</span>.&rdquo;
+          </p>
+          <footer className="mt-4 text-[13px]" style={{ color: 'var(--cs-mute)' }}>
+            we heard this in nearly every interview
+          </footer>
+        </blockquote>
       </div>
     </section>
   )
 }
 
-// ── 3. User stories ────────────────────────────────────────────────────────
+/** The "before": one blended thread where the audience is a shrug, so every comment hedges. */
+function BlendedThread() {
+  const comments = [
+    { who: 'Reviewer', text: 'Looks fine to me, I think.' },
+    { who: 'Reviewer', text: 'A few concerns but happy to discuss offline.' },
+    { who: 'Reviewer', text: 'No major issues from my side.' },
+  ]
+  return (
+    <div
+      className="relative aspect-square w-full overflow-hidden rounded-3xl border p-6"
+      style={{
+        borderColor: 'var(--cs-line)',
+        background: 'linear-gradient(160deg, var(--cs-panel) 0%, var(--cs-bg) 100%)',
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] font-semibold" style={{ color: 'var(--cs-text-dim)' }}>
+          Submission thread
+        </span>
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium"
+          style={{ borderColor: 'var(--cs-line-strong)', color: 'var(--cs-mute)' }}
+        >
+          <EyeQuestion /> Who sees this?
+        </span>
+      </div>
 
-const stories = [
+      <div className="mt-6 space-y-3">
+        {comments.map((c, i) => (
+          <div
+            key={i}
+            className="rounded-2xl border px-4 py-3"
+            style={{ borderColor: 'var(--cs-line)', background: 'rgba(255,255,255,0.03)' }}
+          >
+            <p className="text-[11px] font-semibold" style={{ color: 'var(--cs-mute)' }}>
+              {c.who}
+            </p>
+            <p className="mt-1 text-[13px] leading-snug" style={{ color: 'var(--cs-text-dim)' }}>
+              {c.text}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <p
+        className="absolute inset-x-6 bottom-6 text-center text-[12px] leading-snug"
+        style={{ color: 'var(--cs-mute)' }}
+      >
+        Everyone can read everything → so no one says anything.
+      </p>
+    </div>
+  )
+}
+
+/* ---- 3. The core idea (signature) ------------------------------------- */
+
+function CoreIdea() {
+  return (
+    <section
+      className="relative"
+      style={
+        {
+          viewTimelineName: '--thread',
+          viewTimelineAxis: 'block',
+          minHeight: '340vh',
+        } as React.CSSProperties
+      }
+    >
+      <div className="sticky top-0 flex min-h-screen flex-col justify-center overflow-hidden px-6 py-20 md:px-12">
+        <div className="mx-auto grid w-full max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-12">
+          {/* left — the idea */}
+          <div className="order-2 flex flex-col gap-8 md:order-1">
+            <SectionTag n="02" label="The core idea" />
+            <h2 className="cs-serif text-[clamp(2.2rem,5vw,4rem)] leading-[1]">
+              One thread.
+              <br />
+              Two lanes that never blur.
+            </h2>
+            <p className="max-w-md text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+              Keep the one thread everyone wanted, but drop each comment into a lane the moment you
+              start typing. <span style={{ color: INTERNAL }}>Blue</span> stays between reviewers.{' '}
+              <span style={{ color: VENDOR }}>Teal</span> goes to the vendor. You see who&rsquo;s
+              reading before you write a word.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <LaneChip tone="internal" />
+              <LaneChip tone="vendor" />
+            </div>
+          </div>
+
+          {/* right — the thread assembling itself */}
+          <div className="order-1 md:order-2">
+            <DualLaneThread />
+            <p
+              className="mx-auto mt-4 max-w-md text-center text-[13px] font-light leading-relaxed"
+              style={{ color: 'var(--cs-mute)' }}
+            >
+              One timeline, so nobody loses the thread. Colour and a clear label hold the line the
+              old toggles never could.
+            </p>
+          </div>
+        </div>
+
+        <p
+          className="mx-auto mt-16 max-w-3xl text-center cs-serif text-[clamp(1.4rem,2.8vw,2.2rem)] italic leading-tight"
+          style={{ color: 'var(--cs-text)' }}
+        >
+          You had to know the lane{' '}
+          <span style={{ color: 'var(--cs-accent)' }}>at a glance</span>, not dig through a menu to
+          find it.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+type Comment = {
+  tone: 'internal' | 'vendor'
+  who: string
+  initial: string
+  text: string
+  start: number
+}
+
+const THREAD: Comment[] = [
   {
-    persona: 'SME Reviewer',
-    tone: 'internal' as const,
-    need: 'a private space to flag concerns only other reviewers can see',
-    outcome: 'I can be fully candid without the vendor reading my critique',
-    theme: 'Candor',
+    tone: 'internal',
+    who: 'SME Reviewer',
+    initial: 'R',
+    text: 'The thermal margins don’t hold at the upper range. I wouldn’t approve as-is.',
+    start: 16,
   },
   {
-    persona: 'Domain Leader',
-    tone: 'internal' as const,
-    need: 'to see who a comment is visible to before I post it',
-    outcome: 'I never accidentally leak an internal assessment to the vendor',
-    theme: 'Visibility control',
+    tone: 'internal',
+    who: 'Domain Lead',
+    initial: 'L',
+    text: 'Agreed. Let’s get their test data before we frame anything to them.',
+    start: 28,
   },
   {
-    persona: 'Vendor Representative',
-    tone: 'vendor' as const,
-    need: 'a structured place to receive and answer clarifying questions',
-    outcome: 'I can respond precisely instead of guessing what reviewers want',
-    theme: 'Vendor communication',
+    tone: 'vendor',
+    who: 'To vendor',
+    initial: 'Q',
+    text: 'Can you share thermal test results across the full operating range?',
+    start: 40,
   },
   {
-    persona: 'General User',
-    tone: 'internal' as const,
-    need: 'to only see submissions and threads within my domain',
-    outcome: 'my feed stays relevant and confidential to my area',
-    theme: 'Domain-scoped access',
+    tone: 'vendor',
+    who: 'Vendor Rep',
+    initial: 'V',
+    text: 'Sure, attaching the full-range report now. Happy to walk through it.',
+    start: 52,
+  },
+  {
+    tone: 'internal',
+    who: 'SME Reviewer',
+    initial: 'R',
+    text: 'Their data confirms the drop-off. Recommending conditional pass.',
+    start: 64,
   },
 ]
 
-function UserStories() {
+function part(start: number, span = 11): React.CSSProperties {
+  return { animationRange: `cover ${start}% cover ${start + span}%` } as React.CSSProperties
+}
+
+/**
+ * DualLaneThread — the signature scroll-linked visual.
+ *
+ * A single submission thread that writes itself, comment by comment, as the
+ * reader scrolls the pinned scene. Each comment reads a slice of the parent
+ * `--thread` view-timeline (declared on the tall section), so the assembly is
+ * driven entirely by native CSS scroll-driven animation. Blue comments are the
+ * reviewer-only lane; teal ones are visible to the vendor. It closes on an
+ * audience-aware composer that names its lane before a word is typed.
+ *
+ * Without timeline support, or under prefers-reduced-motion, the full thread is
+ * shown at rest — never a blank card.
+ */
+function DualLaneThread() {
   return (
-    <section className="border-t border-neutral-200/80 px-6 py-20 md:px-12 md:py-28">
-      <div className="mx-auto max-w-5xl">
-        <SectionLabel index="03">User stories</SectionLabel>
-        <div className="grid gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200 sm:grid-cols-2">
-          {stories.map((s) => {
-            const accent = s.tone === 'internal' ? BLUE : AMBER
-            return (
-              <div key={s.theme} className="bg-white p-7">
-                <div className="mb-4 flex items-center justify-between">
-                  <span
-                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: accent }}
-                  >
-                    <LaneDot tone={s.tone} />
-                    {s.theme}
-                  </span>
+    <div className="relative mx-auto w-full max-w-md">
+      {/* blue → teal glow: the two lanes coexisting behind the one thread */}
+      <div
+        aria-hidden
+        className="absolute -inset-6 -z-10 rounded-[2rem] opacity-70 blur-2xl"
+        style={{
+          background: `radial-gradient(55% 55% at 20% 0%, rgba(${INTERNAL_RGB},0.35), transparent 70%), radial-gradient(55% 55% at 85% 100%, rgba(${VENDOR_RGB},0.32), transparent 70%)`,
+        }}
+      />
+
+      <span
+        className="absolute -top-3 right-4 z-20 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em]"
+        style={{
+          border: '1px solid var(--cs-line-strong)',
+          background: 'rgba(10,10,12,0.85)',
+          color: 'var(--cs-mute)',
+        }}
+      >
+        NDA · illustrative
+      </span>
+
+      <div
+        className="overflow-hidden rounded-2xl border backdrop-blur-xl"
+        style={{
+          borderColor: 'var(--cs-line-strong)',
+          background:
+            'linear-gradient(158deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.05) 100%)',
+          boxShadow: '0 30px 80px -30px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12)',
+        }}
+      >
+        {/* header */}
+        <div
+          className="thread-part flex items-center justify-between border-b px-5 py-3.5"
+          style={{ borderColor: 'var(--cs-line)', ...part(6, 8) }}
+        >
+          <div className="leading-tight">
+            <p className="text-[13px] font-semibold tracking-tight" style={{ color: 'var(--cs-text)' }}>
+              Submission #4021
+            </p>
+            <p className="text-[11px]" style={{ color: 'var(--cs-mute)' }}>
+              Thermal sensor · v2
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <LegendDot tone="internal" />
+            <LegendDot tone="vendor" />
+          </div>
+        </div>
+
+        {/* the thread */}
+        <div className="space-y-3 px-5 py-5">
+          {THREAD.map((c, i) => (
+            <ThreadComment key={i} c={c} />
+          ))}
+        </div>
+
+        {/* audience-aware composer */}
+        <div
+          className="thread-part border-t px-5 py-4"
+          style={{ borderColor: 'var(--cs-line)', ...part(76, 12) }}
+        >
+          <div
+            className="rounded-xl border px-3.5 py-3"
+            style={{ borderColor: INTERNAL, background: 'rgba(110,155,255,0.07)' }}
+          >
+            <div className="flex items-center justify-between">
+              <span
+                className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: INTERNAL }}
+              >
+                <LockIcon /> Posting to reviewers only
+              </span>
+              <span
+                className="rounded-full border px-2 py-0.5 text-[9px] font-medium"
+                style={{ borderColor: 'var(--cs-line-strong)', color: 'var(--cs-mute)' }}
+              >
+                switch lane
+              </span>
+            </div>
+            <p className="mt-2 text-[12px]" style={{ color: 'var(--cs-mute)' }}>
+              Write a comment…
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ThreadComment({ c }: { c: Comment }) {
+  const color = c.tone === 'internal' ? INTERNAL : VENDOR
+  const bg = c.tone === 'internal' ? `rgba(${INTERNAL_RGB},0.08)` : `rgba(${VENDOR_RGB},0.08)`
+  return (
+    <div className="thread-part flex gap-3" style={part(c.start)}>
+      <span className="mt-0.5 w-1 shrink-0 rounded-full" style={{ background: color }} aria-hidden />
+      <div className="min-w-0 flex-1 rounded-xl border px-3.5 py-2.5" style={{ borderColor: 'var(--cs-line)', background: bg }}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-semibold" style={{ color: 'var(--cs-text-dim)' }}>
+            {c.who}
+          </span>
+          <span
+            className="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.1em]"
+            style={{ color }}
+          >
+            {c.tone === 'internal' ? <LockIcon /> : <EyeIcon />}
+            {c.tone === 'internal' ? 'Reviewers only' : 'Visible to vendor'}
+          </span>
+        </div>
+        <p className="mt-1 text-[12.5px] leading-snug" style={{ color: 'var(--cs-text)' }}>
+          {c.text}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ---- 4. The design work ------------------------------------------------ */
+
+function DesignWork() {
+  const pillars = [
+    {
+      k: 'A composer that shows its audience',
+      lede: 'You pick the lane before you type, and the box turns that colour.',
+      body: 'People clammed up when the audience was fuzzy. So the box says it plainly before you write: this colour, these readers. The doubt that used to stop them had nowhere to go.',
+      chose: 'Pick the lane first; the box shows the colour and names who’ll read it.',
+      rejected: 'A “share with vendor?” checkbox tacked on after you’ve written it.',
+      visual: <ComposerViz />,
+    },
+    {
+      k: 'Two lanes, one timeline',
+      lede: 'Sorted by colour, ordered by time, never split into tabs.',
+      body: 'An early version broke the thread in two. The best reviewers hated the back-and-forth and quit posting. One timeline kept the conversation they relied on; colour and a label did the dividing.',
+      chose: 'One timeline, comments colour-coded and labelled by lane.',
+      rejected: 'Separate internal and vendor tabs that break the thread apart.',
+      visual: <TimelineViz />,
+    },
+    {
+      k: 'You only see your own patch',
+      lede: 'Your domain’s submissions show up, and nothing else does.',
+      body: 'One giant feed buried people and quietly leaked notes across teams. Scoping everyone to their own area made the feed useful from day one, and turned a cross-team leak into something you’d have to go out of your way to cause.',
+      chose: 'Every role sees only its own domain by default.',
+      rejected: 'One giant feed and a filter you had to set yourself.',
+      visual: <ScopedFeedViz />,
+    },
+  ]
+
+  return (
+    <section className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
+      <div className="max-w-3xl">
+        <SectionTag n="03" label="The design work" />
+        <h2 className="cs-reveal mt-8 cs-serif text-[clamp(2rem,5vw,4rem)] leading-[1.02]">
+          Three decisions that made
+          <br className="hidden md:block" /> people talk again.
+        </h2>
+        <p className="cs-reveal mt-6 max-w-xl text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+          All three protect the same thing: people stay honest only when they can see, without
+          stopping to think, who&rsquo;s on the other end.
+        </p>
+      </div>
+
+      <div className="mt-20 space-y-6">
+        {pillars.map((p, i) => (
+          <article
+            key={p.k}
+            className="cs-reveal grid gap-8 rounded-3xl border p-8 md:grid-cols-[1.2fr_1fr] md:items-center md:p-12"
+            style={{
+              borderColor: 'var(--cs-line)',
+              background:
+                'linear-gradient(150deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 60%)',
+            }}
+          >
+            <div>
+              <span className="text-[12px] font-semibold tracking-[0.2em]" style={{ color: 'var(--cs-accent)' }}>
+                0{i + 1}
+              </span>
+              <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-semibold tracking-tight">{p.k}</h3>
+              <p className="mt-4 cs-serif text-[18px] italic leading-snug" style={{ color: 'var(--cs-text)' }}>
+                {p.lede}
+              </p>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+                {p.body}
+              </p>
+              <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--cs-accent)' }}>
+                    Chose
+                  </dt>
+                  <dd className="mt-1.5 text-[13px] font-light leading-snug" style={{ color: 'var(--cs-text-dim)' }}>
+                    {p.chose}
+                  </dd>
                 </div>
-                <p className="text-[15px] leading-relaxed text-neutral-700">
-                  <span className="text-neutral-400">As a</span>{' '}
-                  <span className="font-semibold text-neutral-900">{s.persona}</span>
-                  <span className="text-neutral-400">, I need</span> {s.need}
-                  <span className="text-neutral-400"> so that</span> {s.outcome}
-                  <span className="text-neutral-400">.</span>
-                </p>
+                <div>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--cs-mute)' }}>
+                    Rejected
+                  </dt>
+                  <dd className="mt-1.5 text-[13px] font-light leading-snug" style={{ color: 'var(--cs-mute)' }}>
+                    {p.rejected}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div className="grid place-items-center">
+              <div
+                className="relative aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl border"
+                style={{ borderColor: 'var(--cs-line)', background: 'var(--cs-bg)' }}
+              >
+                <span
+                  className="absolute right-3 top-3 z-10 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em]"
+                  style={{
+                    border: '1px solid var(--cs-line-strong)',
+                    background: 'rgba(10,10,12,0.6)',
+                    color: 'var(--cs-mute)',
+                  }}
+                >
+                  NDA · illustrative
+                </span>
+                {p.visual}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ComposerViz() {
+  return (
+    <div className="flex h-full flex-col justify-center gap-3 p-6">
+      <div
+        className="rounded-lg border px-3 py-2.5"
+        style={{ borderColor: INTERNAL, background: 'rgba(110,155,255,0.08)' }}
+      >
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: INTERNAL }}>
+          <LockIcon /> Reviewers only
+        </span>
+        <p className="mt-1.5 text-[11px]" style={{ color: 'var(--cs-mute)' }}>
+          Honest notes the vendor never sees.
+        </p>
+      </div>
+      <div className="flex justify-center text-[10px] uppercase tracking-[0.2em]" style={{ color: 'var(--cs-mute)' }}>
+        one toggle
+      </div>
+      <div
+        className="rounded-lg border px-3 py-2.5"
+        style={{ borderColor: VENDOR, background: `rgba(${VENDOR_RGB},0.08)` }}
+      >
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: VENDOR }}>
+          <EyeIcon /> Visible to vendor
+        </span>
+        <p className="mt-1.5 text-[11px]" style={{ color: 'var(--cs-mute)' }}>
+          Clear questions you can share.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function TimelineViz() {
+  const rows: ('internal' | 'vendor')[] = ['internal', 'internal', 'vendor', 'vendor', 'internal']
+  return (
+    <div className="flex h-full items-center p-6">
+      <div className="relative w-full pl-4">
+        <span className="absolute left-0 top-1 bottom-1 w-px" style={{ background: 'var(--cs-line-strong)' }} aria-hidden />
+        <div className="space-y-2.5">
+          {rows.map((tone, i) => {
+            const color = tone === 'internal' ? INTERNAL : VENDOR
+            const bg = tone === 'internal' ? `rgba(${INTERNAL_RGB},0.1)` : `rgba(${VENDOR_RGB},0.1)`
+            return (
+              <div key={i} className="flex items-center gap-2.5">
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: color }} />
+                <span
+                  className="h-6 rounded-md"
+                  style={{ width: `${58 + ((i * 13) % 34)}%`, background: bg, border: `1px solid ${color}44` }}
+                />
               </div>
             )
           })}
         </div>
       </div>
+    </div>
+  )
+}
+
+function ScopedFeedViz() {
+  const rows = [
+    { mine: true, label: 'Thermal sensors' },
+    { mine: true, label: 'Power systems' },
+    { mine: false, label: 'Optics — other domain' },
+    { mine: false, label: 'Materials — other domain' },
+  ]
+  return (
+    <div className="flex h-full flex-col justify-center gap-2.5 p-6">
+      {rows.map((r, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2.5 rounded-lg border px-3 py-2.5"
+          style={{
+            borderColor: r.mine ? INTERNAL : 'var(--cs-line)',
+            background: r.mine ? 'rgba(110,155,255,0.07)' : 'transparent',
+            opacity: r.mine ? 1 : 0.4,
+          }}
+        >
+          <span className="text-[11px]" style={{ color: r.mine ? 'var(--cs-text)' : 'var(--cs-mute)' }}>
+            {r.mine ? <EyeIcon /> : <EyeOffIcon />}
+          </span>
+          <span className="text-[12px]" style={{ color: r.mine ? 'var(--cs-text-dim)' : 'var(--cs-mute)' }}>
+            {r.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ---- 5. The outcome ---------------------------------------------------- */
+
+const METRICS = [
+  { value: '2.3×', label: 'more comments per reviewer' },
+  { value: 'Honest', label: 'how the notes read now (before: hedged)' },
+  { value: '−74%', label: 'faster vendor replies' },
+  { value: '−31%', label: 'from thread opened to decision' },
+]
+
+const TRANSFERS = [
+  { label: 'SaaS', line: 'Private account notes next to customer-facing replies, one inbox.' },
+  { label: 'Fintech', line: 'Analyst risk notes kept clear of the client’s advisory thread.' },
+  { label: 'Crypto', line: 'Audit findings kept out of the public governance chat.' },
+  { label: 'Startups', line: 'Blunt board talk beside a polished investor update.' },
+]
+
+function Outcome() {
+  return (
+    <section className="mx-auto max-w-7xl px-6 py-32 md:px-12 md:py-48">
+      <div className="grid gap-16 md:grid-cols-2 md:items-center">
+        <div>
+          <SectionTag n="04" label="The outcome" />
+          <h2 className="cs-reveal mt-8 cs-serif text-[clamp(2rem,5vw,4rem)] leading-[1.02]">
+            The experts started talking again.
+          </h2>
+          <p className="cs-reveal mt-6 max-w-md text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+            With the risk gone, senior reviewers wrote more, and what they wrote had teeth again.
+            Vendors got clear questions instead of silence, and answered in days, not weeks.
+          </p>
+          <p className="cs-reveal mt-6 max-w-md text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+            The whole review sped up, because the conversation that decided it was finally out in the
+            open, just in the right lane.
+          </p>
+        </div>
+
+        <div className="cs-reveal">
+          <CandorCurve />
+        </div>
+      </div>
+
+      {/* metrics */}
+      <div className="mt-24 grid gap-8 border-t pt-16 sm:grid-cols-2 lg:grid-cols-4 cs-stagger" style={{ borderColor: 'var(--cs-line)' }}>
+        {METRICS.map((m) => (
+          <div key={m.label}>
+            <div className="cs-serif text-[clamp(2.4rem,5vw,3.6rem)] leading-none" style={{ color: 'var(--cs-accent)' }}>
+              {m.value}
+            </div>
+            <p className="mt-3 max-w-[15rem] text-[14px] font-light leading-snug" style={{ color: 'var(--cs-text-dim)' }}>
+              {m.label}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-6 text-[12px] leading-snug" style={{ color: 'var(--cs-mute)' }}>
+        Rough figures; the real numbers are under NDA. They show the shape of the change, not
+        audited stats.
+      </p>
+
+      {/* transferable framing */}
+      <div className="mt-28">
+        <SectionTag n="05" label="Where it transfers" />
+        <p className="cs-reveal mt-8 max-w-2xl text-[16px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+          This one isn&rsquo;t really about vendors. It works anywhere one group has to be honest in
+          front of another without the two blurring together.
+        </p>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 cs-stagger">
+          {TRANSFERS.map((t) => (
+            <div key={t.label} className="rounded-2xl border p-5" style={{ borderColor: 'var(--cs-line)' }}>
+              <span
+                className="inline-flex rounded-full border px-3 py-1 text-[12px] font-semibold tracking-tight"
+                style={{ borderColor: 'var(--cs-line-strong)', color: 'var(--cs-text)' }}
+              >
+                {t.label}
+              </span>
+              <p className="mt-3 text-[13px] font-light leading-relaxed" style={{ color: 'var(--cs-text-dim)' }}>
+                {t.line}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* closing one-liner */}
+      <div className="mt-40 border-t pt-20 text-center" style={{ borderColor: 'var(--cs-line)' }}>
+        <p className="cs-reveal-blur mx-auto max-w-4xl cs-serif text-[clamp(1.8rem,4.5vw,3.6rem)] leading-[1.08]">
+          People don&rsquo;t go quiet because they&rsquo;ve run out of things to say. They go quiet
+          when they can&rsquo;t tell <span style={{ color: 'var(--cs-accent)' }}>who&rsquo;s in the
+          room</span>.
+        </p>
+      </div>
     </section>
   )
 }
 
-// ── 4. Customer journey map ──────────────────────────────────────────────
-
-type Stage = {
-  label: string
-  actor: 'reviewer' | 'vendor' | 'system'
-  pain?: string
-  intervention?: string
-  emotion: number // 0..1, height of the curve
+function CandorCurve() {
+  return (
+    <div
+      className="relative aspect-[5/4] w-full overflow-hidden rounded-3xl border p-8"
+      style={{
+        borderColor: 'var(--cs-line)',
+        background: 'linear-gradient(160deg, var(--cs-panel), var(--cs-bg))',
+      }}
+    >
+      <svg viewBox="0 0 400 320" className="h-full w-full" fill="none" aria-hidden>
+        <defs>
+          <linearGradient id="candor-grad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0%" stopColor={INTERNAL} />
+            <stop offset="100%" stopColor={VENDOR} />
+          </linearGradient>
+        </defs>
+        {[80, 160, 240].map((y) => (
+          <line key={y} x1="20" y1={y} x2="380" y2={y} stroke="var(--cs-line)" strokeDasharray="2 8" />
+        ))}
+        {/* flat "old thread" reference */}
+        <line x1="20" y1="250" x2="380" y2="244" stroke="var(--cs-mute)" strokeWidth="1.5" strokeDasharray="4 6" opacity="0.5" />
+        {/* reviewer comment volume climbing after launch */}
+        <path
+          className="cs-draw"
+          d="M20 262 C 110 258, 170 250, 220 200 S 320 70, 380 40"
+          stroke="url(#candor-grad)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          style={{ '--dash': 620 } as React.CSSProperties}
+        />
+        <circle cx="380" cy="40" r="6" fill={VENDOR} style={{ filter: `drop-shadow(0 0 10px ${VENDOR})` }} />
+      </svg>
+      <div
+        className="pointer-events-none absolute inset-x-8 bottom-6 flex justify-between text-[10px] uppercase tracking-[0.2em]"
+        style={{ color: 'var(--cs-mute)' }}
+      >
+        <span>before</span>
+        <span style={{ color: VENDOR }}>honest comments, climbing →</span>
+      </div>
+    </div>
+  )
 }
 
-const stages: Stage[] = [
-  {
-    label: 'Receive submission',
-    actor: 'system',
-    emotion: 0.55,
-  },
-  {
-    label: 'Open review thread',
-    actor: 'reviewer',
-    pain: 'One blended thread — unclear who can see what',
-    emotion: 0.35,
-  },
-  {
-    label: 'Write comment',
-    actor: 'reviewer',
-    pain: 'Reviewers self-censor, unsure of the audience',
-    intervention: 'Audience-aware compose state, set before typing',
-    emotion: 0.25,
-  },
-  {
-    label: 'Publish',
-    actor: 'reviewer',
-    intervention: 'Lane is explicit & color-coded at the moment of posting',
-    emotion: 0.6,
-  },
-  {
-    label: 'Vendor reads / responds',
-    actor: 'vendor',
-    pain: 'Vendor feels out of the loop, replies are unstructured',
-    intervention: 'Vendor reply framing + unread counts at card level',
-    emotion: 0.7,
-  },
-  {
-    label: 'Decision reached',
-    actor: 'system',
-    intervention: 'Domain-scoped feed keeps the record clean',
-    emotion: 0.9,
-  },
-]
+/* ---- shared ------------------------------------------------------------ */
 
-function EmotionCurve() {
-  // Build a smooth-ish polyline across evenly spaced stages.
-  const w = 100
-  const h = 100
-  const pts = stages.map((s, i) => {
-    const x = (i / (stages.length - 1)) * w
-    const y = h - s.emotion * h
-    return [x, y] as const
-  })
-  const d = pts
-    .map(([x, y], i) => (i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`))
-    .join(' ')
-
+function SectionTag({ n, label }: { n: string; label: string }) {
   return (
-    <svg
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-      className="absolute inset-0 h-full w-full"
-      aria-hidden
+    <div className="flex items-center gap-3">
+      <span className="text-[12px] font-semibold tracking-[0.24em]" style={{ color: 'var(--cs-accent)' }}>
+        {n}
+      </span>
+      <span className="h-px w-8" style={{ background: 'var(--cs-line-strong)' }} />
+      <span className="text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: 'var(--cs-mute)' }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function LaneChip({ tone }: { tone: 'internal' | 'vendor' }) {
+  const color = tone === 'internal' ? INTERNAL : VENDOR
+  return (
+    <span
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-medium"
+      style={{ borderColor: `${color}66`, color: 'var(--cs-text-dim)' }}
     >
-      <path d={d} fill="none" stroke={BLUE} strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
-      {pts.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="1" fill={BLUE} vectorEffect="non-scaling-stroke" />
-      ))}
+      <span className="h-2 w-2 rounded-full" style={{ background: color }} />
+      {tone === 'internal' ? 'Internal · reviewers only' : 'Vendor-facing · shareable'}
+    </span>
+  )
+}
+
+function LegendDot({ tone }: { tone: 'internal' | 'vendor' }) {
+  const color = tone === 'internal' ? INTERNAL : VENDOR
+  return <span className="h-2 w-2 rounded-full" style={{ background: color }} aria-hidden />
+}
+
+/* ---- inline icons (kept inline to match the self-contained system) ----- */
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
     </svg>
   )
 }
 
-function JourneyMap() {
+function EyeIcon() {
   return (
-    <section className="border-t border-neutral-200/80 px-6 py-20 md:px-12 md:py-28">
-      <div className="mx-auto max-w-6xl">
-        <SectionLabel index="04">Customer journey</SectionLabel>
-
-        <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-neutral-500">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-red-500" /> Pain point
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: BLUE }} /> Design
-            intervention
-          </span>
-          <span className="flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5" style={{ color: BLUE }} /> Emotional curve
-          </span>
-        </div>
-
-        {/* Emotion curve band */}
-        <div className="relative mb-3 h-16 w-full rounded-xl border border-neutral-200 bg-white">
-          <EmotionCurve />
-        </div>
-
-        <div className="grid gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200 md:grid-cols-6">
-          {stages.map((s, i) => (
-            <div key={s.label} className="flex min-h-[200px] flex-col bg-white p-5">
-              <div className="flex items-center gap-2 text-[11px] font-semibold tabular-nums text-neutral-300">
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <h3 className="mt-1 text-[14px] font-semibold leading-snug tracking-tight text-neutral-900">
-                {s.label}
-              </h3>
-
-              <div className="mt-4 flex flex-1 flex-col gap-3">
-                {s.pain && (
-                  <div className="rounded-lg bg-red-50 px-3 py-2.5">
-                    <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-red-600">
-                      <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Pain
-                    </div>
-                    <p className="text-[12px] leading-snug text-red-900/80">{s.pain}</p>
-                  </div>
-                )}
-                {s.intervention && (
-                  <div className="rounded-lg px-3 py-2.5" style={{ backgroundColor: '#EEF3FF' }}>
-                    <div
-                      className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
-                      style={{ color: BLUE }}
-                    >
-                      <Sparkles className="h-3 w-3" /> Fix
-                    </div>
-                    <p className="text-[12px] leading-snug text-neutral-700">{s.intervention}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
   )
 }
 
-// ── 5. Insight callout ─────────────────────────────────────────────────────
-
-function Insight() {
+function EyeOffIcon() {
   return (
-    <section className="px-6 py-24 md:px-12 md:py-36">
-      <div className="mx-auto max-w-4xl">
-        <Quote className="h-8 w-8 text-neutral-300" />
-        <blockquote className="mt-6 text-balance text-3xl font-semibold leading-[1.18] tracking-[-0.02em] text-neutral-900 md:text-[44px] md:leading-[1.12]">
-          Reviewers want{' '}
-          <span className="relative whitespace-nowrap">
-            one place to talk
-          </span>{' '}
-          — but{' '}
-          <span style={{ color: BLUE }}>two visibility lanes</span> that{' '}
-          <span style={{ color: AMBER }}>never blur</span>.
-        </blockquote>
-        <p className="mt-6 text-[13px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-          The core insight
-        </p>
-      </div>
-    </section>
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M3 3l18 18M10.6 6.2A9.7 9.7 0 0 1 12 6c6.5 0 10 6 10 6a15.6 15.6 0 0 1-3.4 4M6.6 6.6A15.7 15.7 0 0 0 2 12s3.5 6 10 6a9.6 9.6 0 0 0 3.4-.6" />
+      <path d="M9.5 9.5a3 3 0 0 0 4.2 4.2" />
+    </svg>
   )
 }
 
-// ── 6. Design decisions ────────────────────────────────────────────────────
-
-const decisions = [
-  {
-    title: 'Dual-lane comments',
-    icon: MessageSquare,
-    chose:
-      'A single thread with two visibility lanes — internal (blue) and vendor-facing (amber) — interleaved by time.',
-    rejected: 'Two separate tabs or threads forcing reviewers to context-switch.',
-    why: 'Earlier tools split the conversation and the strongest reviewers stopped posting. One timeline keeps context; color keeps the boundary.',
-  },
-  {
-    title: 'Audience-aware compose state',
-    icon: Eye,
-    chose:
-      'The composer adopts the lane’s color and shows exactly who will see the comment — before a word is typed.',
-    rejected: 'A post-hoc “share with vendor?” checkbox after writing.',
-    why: 'SMEs self-censor when the audience is ambiguous. Declaring the lane up front removes the hesitation that silenced them.',
-  },
-  {
-    title: 'Vendor reply framing',
-    icon: Send,
-    chose:
-      'Vendor replies render as structured clarifications anchored to the reviewer’s question, in the amber lane only.',
-    rejected: 'A free-form chat box mixed into the reviewer timeline.',
-    why: 'Vendors needed to answer precisely; reviewers needed vendor input to never bleed into internal critique.',
-  },
-  {
-    title: 'Domain-scoped feeds',
-    icon: ShieldCheck,
-    chose:
-      'Each role sees only the submissions and threads within their domain by default.',
-    rejected: 'A global feed with manual filtering.',
-    why: 'General users were overwhelmed and confidentiality leaked across domains. Scoping by default made relevance the baseline, not a chore.',
-  },
-  {
-    title: 'Unread count at card level',
-    icon: Gauge,
-    chose:
-      'Per-lane unread badges surface on the submission card, so reviewers see internal vs. vendor activity at a glance.',
-    rejected: 'A single combined notification number.',
-    why: 'A blended count hid which lane needed attention — vendors waited while reviewers missed time-sensitive internal flags.',
-  },
-]
-
-function DecisionCard({ d }: { d: (typeof decisions)[number] }) {
-  const Icon = d.icon
+function EyeQuestion() {
   return (
-    <article className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-7">
-      <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100">
-          <Icon className="h-4.5 w-4.5 text-neutral-700" />
-        </span>
-        <h3 className="text-[16px] font-semibold tracking-tight text-neutral-900">{d.title}</h3>
-      </div>
-
-      <dl className="mt-6 space-y-5">
-        <div>
-          <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-600">
-            <Check className="h-3.5 w-3.5" /> What I chose
-          </dt>
-          <dd className="mt-1.5 text-[13px] leading-relaxed text-neutral-700">{d.chose}</dd>
-        </div>
-        <div>
-          <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
-            <X className="h-3.5 w-3.5" /> What I rejected
-          </dt>
-          <dd className="mt-1.5 text-[13px] leading-relaxed text-neutral-500">{d.rejected}</dd>
-        </div>
-        <div>
-          <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
-            <span className="h-px w-3.5 bg-neutral-300" /> Why
-          </dt>
-          <dd className="mt-1.5 text-[13px] leading-relaxed text-neutral-600">{d.why}</dd>
-        </div>
-      </dl>
-    </article>
-  )
-}
-
-function DesignDecisions() {
-  return (
-    <section className="border-t border-neutral-200/80 px-6 py-20 md:px-12 md:py-28">
-      <div className="mx-auto max-w-5xl">
-        <SectionLabel index="06">Design decisions</SectionLabel>
-        <Annotation>Chose · Rejected · Why — not a feature list</Annotation>
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          {decisions.map((d) => (
-            <DecisionCard key={d.title} d={d} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ── 7. Metrics framework ───────────────────────────────────────────────────
-
-const metrics = [
-  {
-    label: 'Reviewer comment rate',
-    before: 'Low',
-    after: 'High',
-    delta: '+2.3×',
-    note: 'Comments per active reviewer per submission',
-    icon: MessageSquare,
-    good: true,
-  },
-  {
-    label: 'Feedback quality score',
-    before: 'Hedged',
-    after: 'Candid',
-    delta: 'Qualitative',
-    note: 'SME-rated signal on how candid threads read',
-    icon: ShieldCheck,
-    good: true,
-  },
-  {
-    label: 'Vendor clarification response time',
-    before: '~6 days',
-    after: '~1.5 days',
-    delta: '−74%',
-    note: 'Submission of question → vendor reply',
-    icon: Clock3,
-    good: true,
-  },
-  {
-    label: 'Time-to-decision',
-    before: 'Baseline',
-    after: 'Faster',
-    delta: '−31%',
-    note: 'Thread opened → decision reached',
-    icon: Gauge,
-    good: true,
-  },
-]
-
-function Metrics() {
-  return (
-    <section className="border-t border-neutral-200/80 px-6 py-20 md:px-12 md:py-28">
-      <div className="mx-auto max-w-5xl">
-        <SectionLabel index="07">Metrics framework</SectionLabel>
-        <Annotation>Before → after &amp; proxy signals</Annotation>
-
-        <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200 sm:grid-cols-2">
-          {metrics.map((m) => {
-            const Icon = m.icon
-            return (
-              <div key={m.label} className="bg-white p-7">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="h-4 w-4 text-neutral-400" />
-                    <h3 className="text-[14px] font-semibold tracking-tight text-neutral-900">
-                      {m.label}
-                    </h3>
-                  </div>
-                  <span
-                    className="rounded-full px-2.5 py-1 text-[12px] font-semibold tabular-nums"
-                    style={{ backgroundColor: '#EEF3FF', color: BLUE }}
-                  >
-                    {m.delta}
-                  </span>
-                </div>
-
-                <div className="mt-5 flex items-center gap-3">
-                  <span className="text-[13px] font-medium text-neutral-400 line-through decoration-neutral-300">
-                    {m.before}
-                  </span>
-                  <ArrowUpRight className="h-4 w-4 text-neutral-300" />
-                  <span className="text-[15px] font-semibold tracking-tight text-neutral-900">
-                    {m.after}
-                  </span>
-                </div>
-
-                <p className="mt-3 text-[12px] leading-snug text-neutral-500">{m.note}</p>
-              </div>
-            )
-          })}
-        </div>
-        <p className="mt-4 text-[12px] leading-snug text-neutral-400">
-          Directional figures — exact values withheld under NDA. Shown as before → after to convey
-          the shape of the impact, not audited numbers.
-        </p>
-      </div>
-    </section>
-  )
-}
-
-// ── 8. Transferable framing strip ───────────────────────────────────────────
-
-const transfers = [
-  {
-    label: 'SaaS',
-    line: 'Internal account notes vs. customer-visible support replies in one shared inbox.',
-  },
-  {
-    label: 'Fintech',
-    line: 'Analyst risk commentary kept private from the client-facing advisory thread.',
-  },
-  {
-    label: 'Crypto',
-    line: 'Internal protocol audit findings separated from public governance discussion.',
-  },
-  {
-    label: 'Startups',
-    line: 'Founder/board candor lane alongside an investor-facing update lane.',
-  },
-]
-
-function TransferStrip() {
-  return (
-    <section className="border-t border-neutral-200/80 bg-neutral-50 px-6 py-20 md:px-12 md:py-28">
-      <div className="mx-auto max-w-5xl">
-        <SectionLabel index="08">Transferable framing</SectionLabel>
-        <p className="mb-8 max-w-2xl text-[15px] leading-relaxed text-neutral-600">
-          The two-lane pattern isn’t about vendors — it’s about any place where one group must be
-          candid in front of another without blurring the boundary.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {transfers.map((t) => (
-            <div
-              key={t.label}
-              className="rounded-xl border border-neutral-200 bg-white p-5"
-            >
-              <span className="inline-flex rounded-full border border-neutral-200 px-3 py-1 text-[12px] font-semibold tracking-tight text-neutral-800">
-                {t.label}
-              </span>
-              <p className="mt-3 text-[13px] leading-relaxed text-neutral-600">{t.line}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ── page ─────────────────────────────────────────────────────────────────
-
-export default function CommentVisibility() {
-  return (
-    <div className="min-h-screen bg-[#F9F9F9] font-[Inter,ui-sans-serif,system-ui,sans-serif] text-neutral-900 antialiased">
-      <div className="mx-auto bg-white shadow-sm">
-        <Hero />
-        <Personas />
-        <UserStories />
-        <JourneyMap />
-        <Insight />
-        <DesignDecisions />
-        <Metrics />
-        <TransferStrip />
-        <footer className="border-t border-neutral-200/80 px-6 py-10 md:px-12">
-          <div className="mx-auto flex max-w-5xl items-center justify-between text-[12px] text-neutral-400">
-            <span>Two-Audience Commenting · Case study</span>
-            <span className="flex items-center gap-1.5">
-              <EyeOff className="h-3.5 w-3.5" /> Details abstracted under NDA
-            </span>
-          </div>
-        </footer>
-      </div>
-    </div>
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <path d="M10.6 10.5a1.6 1.6 0 1 1 2.2 1.5c-.5.3-.8.6-.8 1.2M12 15.6h.01" />
+    </svg>
   )
 }
