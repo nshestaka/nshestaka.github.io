@@ -34,7 +34,7 @@ function App() {
   const route = hash.replace(/^#/, '')
 
   let page = null
-  if (route === '/two-audience-commenting') {
+  if (route === '/two-audience-commenting' || route === '/case-studies/two-audience-commenting') {
     page = <CommentVisibility />
   } else if (route === '/case-studies/learnhub') {
     page = <LearnHub />
@@ -77,7 +77,19 @@ function App() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-paper text-ink">
-      <Nav progress={route === '/case-studies/proactive-intelligence'} />
+      <Nav
+        progress={
+          route === '/case-studies/proactive-intelligence' ||
+          route === '/two-audience-commenting' ||
+          route === '/case-studies/two-audience-commenting'
+        }
+        progressAccent={
+          route === '/two-audience-commenting' ||
+          route === '/case-studies/two-audience-commenting'
+            ? 'linear-gradient(90deg, #6e9bff, #2fc7bb)'
+            : undefined
+        }
+      />
       {page ?? (
         <main>
           <Hero />
